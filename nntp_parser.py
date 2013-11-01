@@ -20,6 +20,13 @@ class Parser:
         """
         pass
 
+    def __countFiles(self, filelist):
+        """
+        returns an integer reperesenting the total number of files
+        """
+        pass
+
+
     def __parseFile(self, a_file):
         """
         for a given file returns a tuple with Message-ID, author, date, previous post and content
