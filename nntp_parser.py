@@ -6,6 +6,7 @@ A class for parsing set of files containig nntp posts
 
 import os
 import sys
+import re
 
 class Parser:
     
@@ -22,9 +23,10 @@ class Parser:
         self.__file_no = len(f)
         self.__filelist = f
         
-        with file(f[10]) as msg:
+        with file(f[15]) as msg:
             s = msg.read()
-            print self.__getContent(s)
+            #print 'HEADER\n\n' + self.__getHeader(s) + '\n'
+            print 'CONTENT\n\n' + self.__clearContent(self.__getContent(s))
            
 
     def __getFiles(self, path):
@@ -81,11 +83,21 @@ class Parser:
         start = message.find('\n\n') + 2
         return message[start:]
 
-    def __clearCitations(self, content):
+    def __clearContent(self, content):
         """
         returns a string with all the lines begining with '>' deleted
         """
-        pass
+        sig = content.find('-- \n')
+        content = content[:sig]
+        
+        lines = re.split('\n+', content)
+        cleared = []
+        for l in lines:
+            if not '>' in l:
+                cleared.append(l)
+        content = '\n'.join(cleared)
+
+        return content
 
     def __getID(self, header):
         """
