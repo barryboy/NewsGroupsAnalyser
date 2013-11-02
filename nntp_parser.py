@@ -12,6 +12,8 @@ class Parser:
     
     __file_no = 0
     __filelist = []
+    __parsed_dict = {}
+    __stats_dict = {}
 
     def __init__(self, path):
         """
@@ -39,7 +41,6 @@ class Parser:
                     sys.stdout.flush()
         self.__file_no = len(result)
         sys.stdout.write('\n')
-                
         return result
 
 
@@ -58,6 +59,7 @@ class Parser:
         author = self.__getAuthor(header)
         date = self.__getDate(header)
         ref = self.__getLastReference(header)
+        subject = self.__getSubject(header)
 
         result = {}
 
@@ -66,12 +68,17 @@ class Parser:
         result['date'] = date
         result['references'] = ref
         result['content'] = content
+        result['subject'] = subject
 
         #print result
 
         return result
 
     def parse(self):
+        """
+        the main loop, iterates over __filelist calling __parseFile on each file;
+        returns a dictionary, with key = Message-ID and value = dictionary of other fields
+        """
         result = {}
         if self.__file_no < 1:
             sys.stdout.write('\rNothing to parse.\n')
@@ -86,8 +93,7 @@ class Parser:
             ID = parsed.pop('id')
             result[ID] = parsed
         sys.stdout.write('\n')
-
-        return result
+        self.__parsed_dict = result
 
 
     def __getHeader(self, message):
@@ -118,7 +124,6 @@ class Parser:
             if not '>' in l:
                 cleared.append(l)
         content = '\n'.join(cleared)
-
         return content
 
     def __findStr(self, txt, startStr, endStr):
@@ -131,7 +136,6 @@ class Parser:
         else:
             start += len(startStr)
         end = txt.find(endStr, start)
-
         return txt[start:end]
    
     def __getID(self, header):
@@ -139,6 +143,12 @@ class Parser:
         returns a string with the value of Message-ID field from the header
         """
         return self.__findStr(header, 'Message-ID: <', '>\n')
+
+    def __getSubject(self, header):
+        """
+        returns a string with the value of Subject field from the header
+        """
+        return self.__findStr(header, 'Subject: ', '\n')
 
     def __getLastReference(self, header):
         """
@@ -150,7 +160,7 @@ class Parser:
         else:
             entries = ref.split()
             ref = entries[len(entries) - 1]
-
+            ref = self.__findStr(ref, '<', '>')
         return ref
 
     def __getDate(self, header):
@@ -171,10 +181,11 @@ class Parser:
         """
         return self.__findStr(header, 'Subject: ', '\n')
 
-
-nntp_parser = Parser(sys.argv[1])
-dictionary = nntp_parser.parse()
-for ID in dictionary.keys():
-    msg = dictionary.get(ID)
-    print ID,
-    print msg.get('references') + '\n\n'
+    def getParsedDict(self):
+        """
+        returns the dict with parsed files
+        """
+        if len(self.__parsed_dict) < 1:
+            sys.exit('Cannot get the dictionary, the dictionary is empty, run parse() first\nSTOPPING.')
+        else:
+            return self.__parsed_dict
