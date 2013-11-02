@@ -4,28 +4,41 @@ A class for parsing set of files containig nntp posts
 """
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
-# A path to the directory containing the files
+import os
+import sys
+
 class Parser:
+    
+    __filelist = []
+    __file_no = 0
 
     def __init__(self, path):
         """
-        returns a dictionary of parsed files where key = Message-ID and value = tuple 
+        initializes filelist
         """
-        print path
-        pass
+        if not os.path.isdir(path):
+            sys.exit(path + ' is not a valid directory path')
+        f = self.__getFiles(path)
+        self.__file_no = len(f)
+        self.__filelist = f
+           
 
     def __getFiles(self, path):
         """
         returns a list of files under the path
         """
-        pass
+        result = []
+        for dirpath, dirnames, filenames in os.walk(path):
+            for f in filenames:
+                if f.endswith('.msg'):
+                    result.append(os.path.join(dirpath, f))
+        return result
 
     def __countFiles(self, filelist):
         """
         returns an integer reperesenting the total number of files
         """
         pass
-
 
     def __parseFile(self, a_file):
         """
@@ -77,4 +90,4 @@ class Parser:
 
 
 
-nntp_parser = Parser("~/jakas_sciezka")
+nntp_parser = Parser(sys.argv[1])
