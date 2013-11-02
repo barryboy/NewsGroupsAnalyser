@@ -10,8 +10,8 @@ import re
 
 class Parser:
     
-    __filelist = []
     __file_no = 0
+    __filelist = []
 
     def __init__(self, path):
         """
@@ -19,40 +19,37 @@ class Parser:
         """
         if not os.path.isdir(path):
             sys.exit(path + ' is not a valid directory path')
-        f = self.__getFiles(path)
-        self.__file_no = len(f)
-        self.__filelist = f
         
-        with file(f[15]) as msg:
-            s = msg.read()
-            #print 'HEADER\n\n' + self.__getHeader(s) + '\n'
-            print 'CONTENT\n\n' + self.__clearContent(self.__getContent(s))
+        self.__filelist = self.__getFiles(path)
            
 
     def __getFiles(self, path):
         """
-        returns a list of files under the path
+        returns a list of files under the path and sets the __file_no variable
         """
         result = []
+        i = 0
+        sys.stdout.write('\rProcessing files in ' + path + '\n')
         for dirpath, dirnames, filenames in os.walk(path):
             for f in filenames:
                 if f.endswith('.msg'):
+                    i += 1
                     result.append(os.path.join(dirpath, f))
+                    sys.stdout.write('\rRead ' + str(i) + ' files')
+                    sys.stdout.flush()
+        self.__file_no = len(result)
+        sys.stdout.write('\n')
+                
         return result
 
-    def __countFiles(self, filelist):
-        """
-        returns an integer reperesenting the total number of files
-        """
-        pass
 
     def __parseFile(self, a_file):
         """
-        for a given file returns a tuple with Message-ID, author, date, previous post and content
-        """
+        for a given file returns a dict with Message-ID, author, date, previous post and content
+        """        
         header = self.__getHeader(a_file)
         content = self.__getContent(a_file)
-        content = sefl.__clearCitations(content)
+        content = self.__clearContent(content)
         ID = self.__getID(header)
         author = self.__getAuthor(header)
         date = self.__getDate(header)
@@ -65,8 +62,26 @@ class Parser:
         result['date'] = date
         result['references'] = ref
         result['content'] = content
+        return result
+
+    def parse(self):
+        result = {}
+        if self.__file_no < 1:
+            sys.stdout.write('\rNothing to parse.\n')
+            sys.exit('\rSTOPPING.')
+        
+        i = 0
+        for f in self.__filelist:
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rParsing: ' + str(percent) + '% done.')
+            parsed = self.__parseFile(f)
+            ID = parsed.pop('id')
+            result[ID] = parsed
+        sys.stdout.write('\n')
 
         return result
+
 
     def __getHeader(self, message):
         """
@@ -99,30 +114,45 @@ class Parser:
 
         return content
 
+    def __findStr(self, txt, startStr, endStr):
+        """
+        returns substring of txt starting with startStr and ending with endStr
+        """
+        start = txt.find(startStr) + len(startStr)
+        end = txt.find(endStr, start)
+
+        return txt[start:end]
+    
     def __getID(self, header):
         """
         returns a string with the value of Message-ID field from the header
         """
-        pass
+        return self.__findStr(header, 'Message-ID: <', '>\n')
 
     def __getLastReference(self, header):
         """
         returns the Message-ID of the imediate predecessor of the post, or an empty string for the root
         """
-        pass
+        return self.__findStr(header, 'References: ', '\n')
 
     def __getDate(self, header):
         """
         returns the creation date of the post
         """
-        pass
+        return self.__findStr(header, 'Date: ', '\n')
 
     def __getAuthor(self, header):
         """
         returns a string with the author's name
         """
-    pass
+        return self.__findStr(header, 'From: ', '\n')
 
+    def __getSubject(self, header):
+        """
+        returns a string with the subject
+        """
+        return self.__findStr(header, 'Subject: ', '\n')
 
 
 nntp_parser = Parser(sys.argv[1])
+dictionary = nntp_parser.parse()
