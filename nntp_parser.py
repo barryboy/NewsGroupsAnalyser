@@ -44,7 +44,23 @@ class Parser:
         """
         for a given file returns a tuple with Message-ID, author, date, previous post and content
         """
-        pass
+        header = self.__getHeader(a_file)
+        content = self.__getContent(a_file)
+        content = sefl.__clearCitations(content)
+        ID = self.__getID(header)
+        author = self.__getAuthor(header)
+        date = self.__getDate(header)
+        ref = self.__getLastReference(header)
+
+        result = {}
+
+        result['id'] = ID
+        result['author'] = author
+        result['date'] = date
+        result['references'] = ref
+        result['content'] = content
+
+        return result
 
     def __getHeader(self, message):
         """
