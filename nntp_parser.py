@@ -46,9 +46,13 @@ class Parser:
     def __parseFile(self, a_file):
         """
         for a given file returns a dict with Message-ID, author, date, previous post and content
-        """        
-        header = self.__getHeader(a_file)
-        content = self.__getContent(a_file)
+        """  
+        s = ""
+        with file(a_file) as f:
+            s = f.read()
+
+        header = self.__getHeader(s)
+        content = self.__getContent(s)
         content = self.__clearContent(content)
         ID = self.__getID(header)
         author = self.__getAuthor(header)
@@ -62,6 +66,9 @@ class Parser:
         result['date'] = date
         result['references'] = ref
         result['content'] = content
+
+        #print result
+
         return result
 
     def parse(self):
@@ -87,7 +94,7 @@ class Parser:
         """
         returns the string containig the header
         """
-        end = message.find('\n'+ "" + '\n')
+        end = message.find('\n\n')
         return message[:end]
             
 
@@ -118,11 +125,15 @@ class Parser:
         """
         returns substring of txt starting with startStr and ending with endStr
         """
-        start = txt.find(startStr) + len(startStr)
+        start = txt.find(startStr)
+        if start == -1:
+            return ""
+        else:
+            start += len(startStr)
         end = txt.find(endStr, start)
 
         return txt[start:end]
-    
+   
     def __getID(self, header):
         """
         returns a string with the value of Message-ID field from the header
@@ -133,7 +144,14 @@ class Parser:
         """
         returns the Message-ID of the imediate predecessor of the post, or an empty string for the root
         """
-        return self.__findStr(header, 'References: ', '\n')
+        ref = self.__findStr(header, 'References: ', '\n')
+        if len(ref) < 1:
+            ref = 'root'
+        else:
+            entries = ref.split()
+            ref = entries[len(entries) - 1]
+
+        return ref
 
     def __getDate(self, header):
         """
@@ -156,3 +174,7 @@ class Parser:
 
 nntp_parser = Parser(sys.argv[1])
 dictionary = nntp_parser.parse()
+for ID in dictionary.keys():
+    msg = dictionary.get(ID)
+    print ID,
+    print msg.get('references') + '\n\n'
