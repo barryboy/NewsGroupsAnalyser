@@ -21,6 +21,10 @@ class Parser:
         f = self.__getFiles(path)
         self.__file_no = len(f)
         self.__filelist = f
+        
+        with file(f[10]) as msg:
+            s = msg.read()
+            print self.__getContent(s)
            
 
     def __getFiles(self, path):
@@ -64,15 +68,18 @@ class Parser:
 
     def __getHeader(self, message):
         """
-        returns a string with the whole header
+        returns the string containig the header
         """
-        pass
+        end = message.find('\n'+ "" + '\n')
+        return message[:end]
+            
 
     def __getContent(self, message):
         """
         returns a string containing everything from the post except the header
         """
-        pass
+        start = message.find('\n\n') + 2
+        return message[start:]
 
     def __clearCitations(self, content):
         """
