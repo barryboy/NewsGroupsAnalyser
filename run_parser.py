@@ -7,6 +7,9 @@ A class for parsing set of files containig nntp posts
 import nntp_parser 
 import sys
 
+if len(sys.argv) < 2:
+    sys.exit('No argument given.\nSTOPPING.\n')
+
 nntp_parser= nntp_parser.Parser(sys.argv[1])
 nntp_parser.parse()
 dictionary = nntp_parser.getParsedDict()
