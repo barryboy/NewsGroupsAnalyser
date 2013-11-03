@@ -90,7 +90,7 @@ class Parser:
             percent = int((float(i) / self.__file_no) * 100)
             sys.stdout.write('\rParsing: ' + str(percent) + '% done.')
             parsed = self.__parseFile(f)
-            ID = parsed.pop('id')
+            ID = parsed.get('id')
             result[ID] = parsed
         sys.stdout.write('\n')
         self.__parsed_dict = result
@@ -189,3 +189,58 @@ class Parser:
             sys.exit('Cannot get the dictionary, the dictionary is empty, run parse() first\nSTOPPING.')
         else:
             return self.__parsed_dict
+
+
+    def populateThreadTags(self):
+        """
+        run recursively __tagThread() to add 'tag' fields to the dictionary
+        """
+        dictionary = self.getParsedDict()
+        currentTag = 1  
+        
+        i = 0
+        for d in dictionary.keys():
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rTagging roots: ' + str(percent) + '% done.')
+            msgDict = dictionary.get(d)
+            ref = msgDict.get('references')
+            if not ref in dictionary.keys():
+                msgDict['references'] = 'root'
+                ref = 'root'
+            if ref == 'root':
+                msgDict['tag'] = currentTag
+                currentTag += 1
+            else:
+                msgDict['tag'] = 0
+
+        sys.stdout.write('\n')
+
+        i = 0
+        for d in dictionary.keys():
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rTagging threads: ' + str(percent) + '% done.')
+            msgDict = dictionary.get(d)
+            self.__tagThread(msgDict)
+        sys.stdout.write('\n')
+
+
+    def __tagThread(self, msgDict):
+        tag = msgDict.get('tag')
+        if tag == 0:
+            dictionary = self.getParsedDict()
+            ref = msgDict.get('references')
+            path = []
+            path.append(msgDict.get('id'))
+            newTag = 0
+            while newTag == 0:
+                newMsg = dictionary.get(ref)
+                ref = newMsg.get('references')
+                newTag = newMsg.get('tag')
+                path.append(newMsg.get('id'))
+
+            for ID in path:
+                msg = dictionary.get(ID)
+                msg['tag'] = newTag
+

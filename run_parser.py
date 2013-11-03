@@ -12,8 +12,12 @@ if len(sys.argv) < 2:
 
 nntp_parser= nntp_parser.Parser(sys.argv[1])
 nntp_parser.parse()
+nntp_parser.populateThreadTags()
 dictionary = nntp_parser.getParsedDict()
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
-    print ID,
-    print msg.get('author') + '\n'
+    if 'tag' in msg:
+        print str(msg.get('tag')) + '\t',
+        print str(msg.get('subject')) + '\t',
+        print str(msg.get('id')) + '\t',
+        print str(msg.get('references'))
