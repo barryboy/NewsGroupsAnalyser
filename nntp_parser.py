@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-"""
+#!/usr/bin/env python2
+'''
 A class for parsing set of files containig nntp posts
-"""
+'''
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import os
@@ -16,9 +16,9 @@ class Parser:
     __stats_dict = {}
 
     def __init__(self, path):
-        """
+        '''
         initializes filelist
-        """
+        '''
         if not os.path.isdir(path):
             sys.exit(path + ' is not a valid directory path')
         
@@ -26,9 +26,9 @@ class Parser:
            
 
     def __getFiles(self, path):
-        """
+        '''
         returns a list of files under the path and sets the __file_no variable
-        """
+        '''
         result = []
         i = 0
         sys.stdout.write('\rProcessing files in ' + path + '\n')
@@ -45,9 +45,9 @@ class Parser:
 
 
     def __parseFile(self, a_file):
-        """
+        '''
         for a given file returns a dict with Message-ID, author, date, previous post and content
-        """  
+        '''  
         s = ""
         with file(a_file) as f:
             s = f.read()
@@ -75,10 +75,10 @@ class Parser:
         return result
 
     def parse(self):
-        """
+        '''
         the main loop, iterates over __filelist calling __parseFile on each file;
         returns a dictionary, with key = Message-ID and value = dictionary of other fields
-        """
+        '''
         result = {}
         if self.__file_no < 1:
             sys.stdout.write('\rNothing to parse.\n')
@@ -97,24 +97,24 @@ class Parser:
 
 
     def __getHeader(self, message):
-        """
+        '''
         returns the string containig the header
-        """
+        '''
         end = message.find('\n\n')
         return message[:end]
             
 
     def __getContent(self, message):
-        """
+        '''
         returns a string containing everything from the post except the header
-        """
+        '''
         start = message.find('\n\n') + 2
         return message[start:]
 
     def __clearContent(self, content):
-        """
+        '''
         returns a string with all the lines begining with '>' deleted
-        """
+        '''
         sig = content.find('-- \n')
         content = content[:sig]
         
@@ -127,9 +127,9 @@ class Parser:
         return content
 
     def __findStr(self, txt, startStr, endStr):
-        """
+        '''
         returns substring of txt starting with startStr and ending with endStr
-        """
+        '''
         start = txt.find(startStr)
         if start == -1:
             return ""
@@ -139,21 +139,21 @@ class Parser:
         return txt[start:end]
    
     def __getID(self, header):
-        """
+        '''
         returns a string with the value of Message-ID field from the header
-        """
+        '''
         return self.__findStr(header, 'Message-ID: <', '>\n')
 
     def __getSubject(self, header):
-        """
+        '''
         returns a string with the value of Subject field from the header
-        """
+        '''
         return self.__findStr(header, 'Subject: ', '\n')
 
     def __getLastReference(self, header):
-        """
+        '''
         returns the Message-ID of the imediate predecessor of the post, or an empty string for the root
-        """
+        '''
         ref = self.__findStr(header, 'References: ', '\n')
         if len(ref) < 1:
             ref = 'root'
@@ -164,27 +164,27 @@ class Parser:
         return ref
 
     def __getDate(self, header):
-        """
+        '''
         returns the creation date of the post
-        """
+        '''
         return self.__findStr(header, 'Date: ', '\n')
 
     def __getAuthor(self, header):
-        """
+        '''
         returns a string with the author's name
-        """
+        '''
         return self.__findStr(header, 'From: ', '\n')
 
     def __getSubject(self, header):
-        """
+        '''
         returns a string with the subject
-        """
+        '''
         return self.__findStr(header, 'Subject: ', '\n')
 
     def getParsedDict(self):
-        """
+        '''
         returns the dict with parsed files
-        """
+        '''
         if len(self.__parsed_dict) < 1:
             sys.exit('Cannot get the dictionary, the dictionary is empty, run parse() first\nSTOPPING.')
         else:
@@ -192,9 +192,9 @@ class Parser:
 
 
     def populateThreadTags(self):
-        """
+        '''
         run recursively __tagThread() to add 'tag' fields to the dictionary
-        """
+        '''
         dictionary = self.getParsedDict()
         currentTag = 1  
         
@@ -227,6 +227,9 @@ class Parser:
 
 
     def __tagThread(self, msgDict):
+        '''
+        this method assigns distinct numbers to threads and stores it in a field "tag" in each thread
+        '''
         tag = msgDict.get('tag')
         if tag == 0:
             dictionary = self.getParsedDict()
@@ -244,3 +247,45 @@ class Parser:
                 msg = dictionary.get(ID)
                 msg['tag'] = newTag
 
+
+    def anonimizeUsers(self):
+        '''
+        replaces Message-ID and author ID with numbers
+        '''
+        dictionary = self.getParsedDict()
+        msgID_dict = {'root':'root'}
+        authorID_dict = {}
+        current_UID = 0
+        current_MID = 0
+
+        sys.stdout.write('ANONYMIZING:\n')
+        i = 0
+        for d in dictionary.keys():
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rAssigning new IDs: ' + str(percent) + '% done.')
+            msg = dictionary.get(d)
+            if d not in msgID_dict:
+                msgID_dict[d] = current_MID
+                current_MID += 1
+            UID = msg.get('author');
+            if UID not in authorID_dict:
+                authorID_dict[UID] = current_UID
+                current_UID += 1
+        sys.stdout.write('\n')
+        
+        i = 0
+        new_dict = {}
+        for d in dictionary:
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rReplacing current IDs: ' + str(percent) + '% done.')
+            msg = dictionary.get(d)
+            msg['author'] = authorID_dict[msg.get('author')]
+            msg['id'] = msgID_dict[msg.get('id')]
+            msg['references'] = msgID_dict[msg.get('references')]
+            new_dict[msg.get('id')] = msg 
+        sys.stdout.write('\n')
+        
+        
+        self.__parsed_dict = new_dict

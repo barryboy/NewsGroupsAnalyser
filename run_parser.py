@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 """
 A class for parsing set of files containig nntp posts
 """
@@ -13,11 +13,14 @@ if len(sys.argv) < 2:
 nntp_parser= nntp_parser.Parser(sys.argv[1])
 nntp_parser.parse()
 nntp_parser.populateThreadTags()
+nntp_parser.anonimizeUsers()
 dictionary = nntp_parser.getParsedDict()
+
+print 'THREAD\tID\tREFERENCES\tSUBJECT'
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     if 'tag' in msg:
         print str(msg.get('tag')) + '\t',
-        print str(msg.get('subject')) + '\t',
         print str(msg.get('id')) + '\t',
-        print str(msg.get('references'))
+        print str(msg.get('references')) + '\t',
+        print str(msg.get('subject'))
