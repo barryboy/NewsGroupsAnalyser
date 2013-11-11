@@ -87,7 +87,7 @@ class Parser:
         for f in self.__filelist:
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rParsing: ' + str(percent) + '% done.')
+            sys.stdout.write('\rParsing messages: ' + '\t\t\t\t' + str(percent) + '% done.')
             parsed = self.__parseFile(f)
             ID = parsed.get('id')
             result[ID] = parsed
@@ -201,7 +201,7 @@ class Parser:
         for d in dictionary.keys():
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rTagging roots: ' + str(percent) + '% done.')
+            sys.stdout.write('\rTagging roots: ' +  '\t\t\t\t\t' + str(percent) + '% done.')
             msgDict = dictionary.get(d)
             ref = msgDict.get('references')
             if not ref in dictionary.keys():
@@ -219,7 +219,7 @@ class Parser:
         for d in dictionary.keys():
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rTagging threads: ' + str(percent) + '% done.')
+            sys.stdout.write('\rTagging threads: ' + '\t\t\t\t' + str(percent) + '% done.')
             msgDict = dictionary.get(d)
             self.__tagThread(msgDict)
         sys.stdout.write('\n')
@@ -262,7 +262,7 @@ class Parser:
         for d in dictionary.keys():
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rAssigning new IDs: ' + str(percent) + '% done.')
+            sys.stdout.write('\r\tAssigning new IDs: ' + '\t\t\t' + str(percent) + '% done.')
             msg = dictionary.get(d)
             if d not in msgID_dict:
                 msgID_dict[d] = current_MID
@@ -278,7 +278,7 @@ class Parser:
         for d in dictionary:
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rReplacing current IDs: ' + str(percent) + '% done.')
+            sys.stdout.write('\r\tReplacing current IDs: ' + '\t\t\t' + str(percent) + '% done.')
             msg = dictionary.get(d)
             msg['author'] = authorID_dict[msg.get('author')]
             msg['id'] = msgID_dict[msg.get('id')]
@@ -299,7 +299,7 @@ class Parser:
         for d in dictionary:
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rGetting message tail: ' + str(percent) + '% done.')
+            sys.stdout.write('\rGetting message tails: ' + '\t\t\t\t' + str(percent) + '% done.')
 
             tail = []
             message = dictionary.get(d)
@@ -315,3 +315,45 @@ class Parser:
 
         sys.stdout.write('\n')
 
+
+    def parseTails(self):
+        dictionary = self.getParsedDict()
+        i = 0
+        for d in dictionary:
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rParsing message tails: ' + '\t\t\t\t' + str(percent) + '% done.')
+            message = dictionary.get(d)
+            tail =message.get('tail')
+            parsedTail = self.__parseTail(tail)
+            for field in parsedTail:
+                message[field] = parsedTail.get(field)
+        sys.stdout.write('\n')
+
+    def __parseTail(self, tail):
+        parsedTail = {'ABA':0, 'ABC':0, 'ABCA':0, 'ABCB':0, 'ABCD':0, 'ABAB':0, 'ABAC':0}
+        l = len(tail)
+
+        if l >= 3:
+            frag = tail[:3]
+            if (frag[0] == frag[2]) and (frag[2] != frag[1]):
+                parsedTail['ABA'] = 1
+            else:
+                parsedTail['ABC'] = 1
+
+        if l >= 4:
+            frag = tail[:4]
+            if (frag[0] != frag[1]) and (frag[1] != frag[2]) and (frag[0] != frag[2]):
+                if (frag[3] == frag[0]):
+                    parsedTail['ABCA'] = 1
+                if (frag[3] == frag[1]):
+                    parsedTail['ABCB'] = 1
+                if (frag[3] != frag[1]) and (frag[3] != frag[2]) and (frag[3] != frag[2]):
+                    parsedTail['ABCD'] = 1
+            if (frag[0] == frag[2]) and (frag[2] != frag[1]):
+                if (frag[3] == frag[1]):
+                    parsedTail['ABAB'] = 1
+                if (frag[3] != frag[0]) and (frag[3] != frag[1]):
+                    parsedTail['ABAC'] = 1
+        
+        return parsedTail
