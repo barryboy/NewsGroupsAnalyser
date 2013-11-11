@@ -14,15 +14,17 @@ nntp_parser= nntp_parser.Parser(sys.argv[1])
 nntp_parser.parse()
 nntp_parser.populateThreadTags()
 nntp_parser.anonimizeUsers()
-nntp_parser.checkABA()
+nntp_parser.getTail()
 dictionary = nntp_parser.getParsedDict()
 
 
-print 'THREAD\tID\tREFERENCES\tABA'
+print 'THREAD\tID\tAUTHOR\tREFERENCES\tTAIL'
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     if 'tag' in msg:
         print str(msg.get('tag')) + '\t',
         print str(msg.get('id')) + '\t',
+        print str(msg.get('author')) + '\t',
+        print str(msg.get('date')) + '\t',
         print str(msg.get('references')) + '\t',
-        print str(msg.get('ABA'))
+        print str(msg.get('tail'))

@@ -290,35 +290,28 @@ class Parser:
         self.__parsed_dict = new_dict
 
 
-    def checkABA(self):
+    def getTail(self):
+        '''
+        crawls a thread backwards from current message and records its tail of previous authors
+        '''
         dictionary = self.getParsedDict()
         i = 0
         for d in dictionary:
             i += 1
             percent = int((float(i) / self.__file_no) * 100)
-            sys.stdout.write('\rChecking ABA: ' + str(percent) + '% done.')
-            
-            currentMsg = dictionary.get(d)
-            currentMsgID = currentMsg.get('id')
-            currentMsgRef = currentMsg.get('references')
-            prevMsgID = 0
-            prev2MsgID = 0
-            if not currentMsgRef == 'root':
-                prevMsg = dictionary.get(currentMsgRef)
-                prevMsgID = prevMsg.get('id')
-                prevMsgRef = prevMsg.get('references')
-                if not prevMsgRef == 'root':
-                    prev2Msg = dictionary.get(prevMsgRef)
-                    prev2MsgID = prev2Msg.get('id')
-                else:
-                    pass
-            else:
-                pass
+            sys.stdout.write('\rGetting message tail: ' + str(percent) + '% done.')
 
-            #currentMsg['ABA'] = str(currentMsgID) + ' ' + str(prevMsgID) +  ' ' + str(prev2MsgID)
-            if currentMsgID == prev2MsgID:
-               currentMsg['ABA'] = 1
-            else:
-               currentMsg['ABA'] = 0
+            tail = []
+            message = dictionary.get(d)
+            authorID = message.get('author')
+            tail.append(authorID)
+            ref = message.get('references')
+            while ref != 'root':
+                currentMsg = dictionary.get(ref)
+                authorID = currentMsg.get('author')
+                tail.append(authorID)
+                ref = currentMsg.get('references')
+            message['tail'] = tail
+
         sys.stdout.write('\n')
 
