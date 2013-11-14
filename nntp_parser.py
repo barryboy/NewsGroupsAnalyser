@@ -317,6 +317,9 @@ class Parser:
 
 
     def parseTails(self):
+        '''
+        for each tail runs parseTail() and stores the result in the massage's dict
+        '''
         dictionary = self.getParsedDict()
         i = 0
         for d in dictionary:
@@ -330,30 +333,56 @@ class Parser:
                 message[field] = parsedTail.get(field)
         sys.stdout.write('\n')
 
+
+
     def __parseTail(self, tail):
-        parsedTail = {'ABA':0, 'ABC':0, 'ABCA':0, 'ABCB':0, 'ABCD':0, 'ABAB':0, 'ABAC':0}
+        '''
+        counts the occurences of each sequence in the tail and stores it in the entry: 'nSEQUENCE'
+        it stores also the immediate predecessor sequence of a current message and stores it in the entry: 'SEQUENCE'
+        '''
+        parsedTail = {'ABA':0, 'ABC':0, 'ABCA':0, 'ABCB':0, 'ABCD':0, 'ABAB':0, 'ABAC':0, 'nABA':0, 'nABC':0, 'nABCA':0, 'nABCB':0, 'nABCD':0, 'nABAB':0, 'nABAC':0, 'tail_length':0}
         l = len(tail)
+        parsedTail['tail_length'] = l
+        n3 = l - 2 
+        if n3 < 0: n3 = 0
+        n4 = l - 3
+        if n4 < 0: n4 = 0
 
-        if l >= 3:
-            frag = tail[:3]
+        for i in range(n3):
+            frag = tail[i:i+3]
             if (frag[0] == frag[2]) and (frag[2] != frag[1]):
-                parsedTail['ABA'] = 1
+                if i == 0:
+                    parsedTail['ABA'] = 1
+                parsedTail['nABA'] += 1
             else:
-                parsedTail['ABC'] = 1
+                if i == 0:
+                    parsedTail['ABC'] = 1
+                parsedTail['nABC'] += 1
 
-        if l >= 4:
-            frag = tail[:4]
+        for i in range(n4):
+            frag = tail[i:i+4]
             if (frag[0] != frag[1]) and (frag[1] != frag[2]) and (frag[0] != frag[2]):
                 if (frag[3] == frag[0]):
-                    parsedTail['ABCA'] = 1
+                    if i == 0:
+                        parsedTail['ABCA'] = 1
+                    parsedTail['nABCA'] += 1
                 if (frag[3] == frag[1]):
-                    parsedTail['ABCB'] = 1
+                    if i == 0:
+                        parsedTail['ABCB'] = 1
+                    parsedTail['nABCB'] += 1
                 if (frag[3] != frag[1]) and (frag[3] != frag[2]) and (frag[3] != frag[2]):
-                    parsedTail['ABCD'] = 1
+                    if i == 0:
+                        parsedTail['ABCD'] = 1
+                    parsedTail['nABCD'] += 1
             if (frag[0] == frag[2]) and (frag[2] != frag[1]):
                 if (frag[3] == frag[1]):
-                    parsedTail['ABAB'] = 1
+                    if i == 0:
+                        parsedTail['ABAB'] = 1
+                    parsedTail['nABAB'] += 1
                 if (frag[3] != frag[0]) and (frag[3] != frag[1]):
-                    parsedTail['ABAC'] = 1
-        
+                    if i == 0:
+                        parsedTail['ABAC'] = 1
+                    parsedTail['nABAC'] += 1
+
         return parsedTail
+
