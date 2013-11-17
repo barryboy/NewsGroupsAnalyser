@@ -7,6 +7,8 @@ A class for parsing set of files containig nntp posts
 import os
 import sys
 import re
+from dateutil import parser
+import calendar
 
 class Parser:
     
@@ -57,6 +59,7 @@ class Parser:
         ID = self.__getID(header)
         author = self.__getAuthor(header)
         date = self.__getDate(header)
+        epoch = self.__parseDate(date)
         ref = self.__getLastReference(header)
         subject = self.__getSubject(header)
 
@@ -65,6 +68,7 @@ class Parser:
         result['id'] = ID
         result['author'] = author
         result['date'] = date
+        result['epoch_time'] = epoch
         result['references'] = ref
         result['content'] = content
         result['subject'] = subject
@@ -123,6 +127,7 @@ class Parser:
             if not '>' in l:
                 cleared.append(l)
         content = '\n'.join(cleared)
+        content = content.replace('\n', ' ')
         return content
 
     def __findStr(self, txt, startStr, endStr):
@@ -167,6 +172,13 @@ class Parser:
         returns the creation date of the post
         '''
         return self.__findStr(header, 'Date: ', '\n')
+
+    def __parseDate(self, date_string):
+       '''
+       method takes timestaamp string and returns POSIX epoch time
+       '''
+       parsed = parser.parse(date_string)
+       return calendar.timegm(parsed.timetuple())
 
     def __getAuthor(self, header):
         '''
