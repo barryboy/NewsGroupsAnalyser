@@ -14,6 +14,7 @@ if largv < 2:
 infile = sys.argv[1]
 splitted = infile.split('/') 
 outfile = splitted[len(splitted)-1] + '.csv'
+outfile2 = splitted[len(splitted)-1] + '_content.csv'
 
 nntp_parser= nntp_parser.Parser(infile)
 nntp_parser.parse()
@@ -24,7 +25,9 @@ nntp_parser.parseTails()
 dictionary = nntp_parser.getParsedDict()
 
 f = open(outfile, 'w')
-f.write('THREAD\tID\tAUTHOR\tDATE\tEPOCH\tREF\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\tCONTENT\n')
+f2 = open(outfile2, 'w')
+f.write('THREAD\tID\tAUTHOR\tDATE\tEPOCH\tREF\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\n')
+f2.write('ID\tCONTENET\n')
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     line = ''
@@ -49,8 +52,9 @@ for ID in dictionary.keys():
     line += str(msg.get('nABCA')) + '\t'
     line += str(msg.get('nABCB')) + '\t'
     line += str(msg.get('nABCD')) + '\t'
-    line += str(msg.get('tail')) + '\t'
-    line += str(msg.get('content'))
+    line += str(msg.get('tail'))
     f.write(line + '\n')
+    f2.write(str(msg.get('id')) + '\t'  + str(msg.get('content')) + '\n')
 
 f.close()
+f2.close()
