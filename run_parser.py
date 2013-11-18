@@ -26,17 +26,18 @@ dictionary = nntp_parser.getParsedDict()
 
 f = open(outfile, 'w')
 f2 = open(outfile2, 'w')
-f.write('THREAD\tID\tAUTHOR\tDATE\tEPOCH\tREF\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\n')
+f.write('THREAD\tID\tTRUE_ROOT\tAUTHOR\tREFERENCES\tDATE\tEPOCH\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\n')
 f2.write('ID\tCONTENET\n')
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     line = ''
     line += str(msg.get('tag')) + '\t'
     line += str(msg.get('id')) + '\t'
+    line += str(msg.get('true_root')) + '\t'
     line += str(msg.get('author')) + '\t'
+    line += str(msg.get('references')) + '\t'
     line += str(msg.get('date')) + '\t'
     line += str(msg.get('epoch_time')) + '\t'
-    line += str(msg.get('references')) + '\t'
     line += str(msg.get('tail_length')) + '\t'
     line += str(msg.get('ABA')) + '\t'
     line += str(msg.get('ABC')) + '\t'

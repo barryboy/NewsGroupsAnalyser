@@ -72,11 +72,14 @@ class Parser:
         result['references'] = ref
         result['content'] = content
         result['subject'] = subject
-
-        #print result
+        if ref == 'root':
+            result['true_root'] = 1
+        else:
+            result['true_root'] = 0
 
         return result
 
+    
     def parse(self):
         '''
         the main loop, iterates over __filelist calling __parseFile on each file;
