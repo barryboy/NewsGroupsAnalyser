@@ -129,8 +129,9 @@ class Parser:
         for l in lines:
             if not '>' in l:
                 cleared.append(l)
-        content = '\n'.join(cleared)
+        content = ' '.join(cleared)
         content = content.replace('\n', ' ')
+        content = content.replace('\r', ' ')
         return content
 
     def __findStr(self, txt, startStr, endStr):
