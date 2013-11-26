@@ -307,7 +307,6 @@ class Parser:
             new_dict[msg.get('id')] = msg 
         sys.stdout.write('\n')
         
-        
         self.__parsed_dict = new_dict
 
 
@@ -332,6 +331,7 @@ class Parser:
                 authorID = currentMsg.get('author')
                 tail.append(authorID)
                 ref = currentMsg.get('references')
+                currentMsg['leaf'] = 0
             message['tail'] = tail
 
         sys.stdout.write('\n')

@@ -30,13 +30,14 @@ file_count = 0
 current_outfile = outfile2 + '_' + str(file_count) + '.csv'
 f2 = open(current_outfile, 'w')
 
-f.write('THREAD\tID\tTRUE_ROOT\tAUTHOR\tREFERENCES\tDATE\tEPOCH\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\tSUBJECT\n')
+f.write('THREAD\tID\tTRUE_ROOT\tLEAF\tAUTHOR\tREFERENCES\tDATE\tEPOCH\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\tSUBJECT\n')
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     line = ''
     line += str(msg.get('tag')) + '\t'
     line += str(msg.get('id')) + '\t'
     line += str(msg.get('true_root')) + '\t'
+    line += str(msg.get('leaf')) + '\t'
     line += str(msg.get('author')) + '\t'
     line += str(msg.get('references')) + '\t'
     line += str(msg.get('date')) + '\t'
