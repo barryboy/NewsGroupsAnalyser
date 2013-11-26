@@ -62,6 +62,7 @@ class Parser:
         epoch = self.__parseDate(date)
         ref = self.__getLastReference(header)
         subject = self.__getSubject(header)
+        subject = self.__clearContent(subject)
 
         result = {}
 
@@ -72,6 +73,7 @@ class Parser:
         result['references'] = ref
         result['content'] = content
         result['subject'] = subject
+        result['leaf'] = 1
         if ref == 'root':
             result['true_root'] = 1
         else:
@@ -132,6 +134,7 @@ class Parser:
         content = ' '.join(cleared)
         content = content.replace('\n', ' ')
         content = content.replace('\r', ' ')
+        content = content.replace('\t', ' ')
         return content
 
     def __findStr(self, txt, startStr, endStr):
@@ -257,10 +260,12 @@ class Parser:
                 ref = newMsg.get('references')
                 newTag = newMsg.get('tag')
                 path.append(newMsg.get('id'))
-
+            msg = dictionary.get(path[len(path)-1])
+            true_root = msg.get('true_root')
             for ID in path:
                 msg = dictionary.get(ID)
                 msg['tag'] = newTag
+                msg['true_root'] = true_root
 
 
     def anonimizeUsers(self):
