@@ -75,6 +75,7 @@ class Parser:
         result['subject'] = subject
         result['leaf'] = 1
         result['forks'] = -1
+        result['branch'] = 0
         if ref == 'root':
             result['true_root'] = 1
         else:
@@ -185,8 +186,11 @@ class Parser:
        '''
        method takes timestaamp string and returns POSIX epoch time
        '''
-       parsed = parser.parse(date_string)
-       return calendar.timegm(parsed.timetuple())
+       try:
+           parsed = parser.parse(date_string)
+           return calendar.timegm(parsed.timetuple())
+       except:
+           return 0
 
     def __getAuthor(self, header):
         '''
@@ -337,6 +341,7 @@ class Parser:
 
         sys.stdout.write('\n')
 
+
     def countForks(self):
         '''
         counts number of forks of each message
@@ -358,6 +363,33 @@ class Parser:
                 message['forks'] = 0
         sys.stdout.write('\n')
 
+    def tagBranches(self):
+        '''
+        Assigns tags to straight branches between forks. Can only to be called after tagging leafs and forks !!!
+        '''
+        dictionary = self.getParsedDict()
+        i = 0
+        branch_id = 1
+        for d in dictionary:
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rTagging branches: ' + '\t\t\t\t' + str(percent) + '% done.')
+            message = dictionary.get(d)
+            if message.get('leaf') == 1:
+                message['branch'] = branch_id
+                ref = message.get('references')
+                if ref != 'root':
+                    while ref != 'root':
+                        message = dictionary.get(ref)
+                        ref = message.get('references')
+                        if int(message.get('forks')) > 0:
+                            branch_id += 1
+                        message['branch'] = branch_id
+
+        sys.stdout.write('\n')
+
+
+    
     def parseTails(self):
         '''
         for each tail runs parseTail() and stores the result in the massage's dict
