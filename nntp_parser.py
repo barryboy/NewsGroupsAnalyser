@@ -74,6 +74,7 @@ class Parser:
         result['content'] = content
         result['subject'] = subject
         result['leaf'] = 1
+        result['forks'] = -1
         if ref == 'root':
             result['true_root'] = 1
         else:
@@ -336,6 +337,26 @@ class Parser:
 
         sys.stdout.write('\n')
 
+    def countForks(self):
+        '''
+        counts number of forks of each message
+        '''
+        dictionary = self.getParsedDict()
+        i = 0
+        for d in dictionary:
+            i += 1
+            percent = int((float(i) / self.__file_no) * 100)
+            sys.stdout.write('\rCounting forks: ' + '\t\t\t\t' + str(percent) + '% done.')
+            message = dictionary.get(d)
+            ref = message.get('references')
+            if ref != 'root':
+                referenced = dictionary.get(ref)
+                referenced['forks'] += 1
+        for d in dictionary:
+            message = dictionary.get(d)
+            if message['forks'] == -1:
+                message['forks'] = 0
+        sys.stdout.write('\n')
 
     def parseTails(self):
         '''
