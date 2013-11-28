@@ -5,6 +5,7 @@ A runner for Parser class from nntp_parser.py
 # vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
 
 import nntp_parser 
+import net_maker
 import sys
 
 largv = len(sys.argv)
@@ -15,6 +16,7 @@ infile = sys.argv[1]
 splitted = infile.split('/') 
 outfile = splitted[len(splitted)-1] + '.csv'
 outfile2 = splitted[len(splitted)-1] + '_content'
+netfile = splitted[len(splitted)-1] + '.net'
 
 nntp_parser= nntp_parser.Parser(infile)
 nntp_parser.parse()
@@ -25,6 +27,8 @@ nntp_parser.parseTails()
 nntp_parser.countForks()
 nntp_parser.tagBranches()
 dictionary = nntp_parser.getParsedDict()
+
+netmaker = net_maker.NetMaker(dictionary)
 
 f = open(outfile, 'w')
 line_count = 0
@@ -74,5 +78,9 @@ for ID in dictionary.keys():
 
     f2.write('[' + str(msg.get('id')) + '] '  + str(msg.get('content')) + '\n')
 
+f3 = open(netfile, 'w')
+f3.write(netmaker.prepareFile())
+
 f.close()
 f2.close()
+f3.close()
