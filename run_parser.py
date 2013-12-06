@@ -14,7 +14,7 @@ if largv < 2:
     sys.exit('No argument given.\nSTOPPING.\n')
 infile = sys.argv[1]
 splitted = infile.split('/') 
-outfile = splitted[len(splitted)-1] + '.csv'
+outfile = splitted[len(splitted)-1] + '.txt'
 outfile2 = splitted[len(splitted)-1] + '_content'
 netfile = splitted[len(splitted)-1] + '.net'
 
@@ -33,10 +33,10 @@ netmaker = net_maker.NetMaker(dictionary)
 f = open(outfile, 'w')
 line_count = 0
 file_count = 0
-current_outfile = outfile2 + '_' + str(file_count) + '.csv'
+current_outfile = outfile2 + '_' + str(file_count) + '.txt'
 f2 = open(current_outfile, 'w')
 
-f.write('THREAD\tID\tTRUE_ROOT\tLEAF\tBRANCH\tFORKS\tAUTHOR\tREFERENCES\tDATE\tEPOCH\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tTAIL\tSUBJECT\n')
+f.write('THREAD\tID\tTRUE_ROOT\tLEAF\tBRANCH\tFORKS\tAUTHOR\tREFERENCES\tDATE\tEPOCH\ttail_length\tABA\tABC\tABAB\tABAC\tABCA\tABCB\tABCD\tnABA\tnABC\tnABAB\tnABAC\tnABCA\tnABCB\tnABCD\tSUBJECT\n')
 for ID in dictionary.keys():
     msg = dictionary.get(ID)
     line = ''
@@ -65,13 +65,12 @@ for ID in dictionary.keys():
     line += str(msg.get('nABCA')) + '\t'
     line += str(msg.get('nABCB')) + '\t'
     line += str(msg.get('nABCD')) + '\t'
-    line += str(msg.get('tail')) + '\t'
     line += str(msg.get('subject'))
     f.write(line + '\n')
     line_count += 1
     if line_count > 10000:
         file_count += 1
-        current_outfile = outfile2 + '_' + str(file_count) + '.csv'
+        current_outfile = outfile2 + '_' + str(file_count) + '.txt'
         line_count = 0
         f2.close()
         f2 = open(current_outfile, 'w')
